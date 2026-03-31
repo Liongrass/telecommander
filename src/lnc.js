@@ -56,6 +56,9 @@ export async function pair(pairingPhrase, password) {
   await l.connect();
   log('connect() resolved — isConnected:', l.isConnected, '| isReady:', l.isReady, '| status:', l.status);
   assertConnected(l);
+  // Clear the stored pairing phrase so reconnects use localKey/remoteKey only
+  l.credentials.pairingPhrase = '';
+  log('Pairing phrase cleared from credential store');
   return l.isConnected;
 }
 
@@ -63,7 +66,8 @@ export async function pair(pairingPhrase, password) {
 export async function login(password) {
   const l = ensureLNC();
   log('Logging in with stored credentials');
-  l.password = password;
+  l.credentials.password = password;
+  l.credentials.pairingPhrase = '';
   log('Credentials before connect:', {
     isPaired: l.credentials?.isPaired,
     serverHost: l.credentials?.serverHost,
