@@ -129,7 +129,7 @@ function initPairScreen() {
       // After connecting, go to settings (first time) or numpad (returning)
       if (!hasSettings()) {
         showScreen('settings');
-        initSettingsScreen(false);
+        initSettingsScreen();
       } else {
         settings = getSettings();
         showScreen('numpad');
@@ -144,12 +144,8 @@ function initPairScreen() {
 }
 
 // ── Settings screen ─────────────────────────────────────────
-function initSettingsScreen(showBack = true) {
+function initSettingsScreen() {
   const s = getSettings();
-
-  // Back button
-  $('btn-settings-back').classList.toggle('hidden', !showBack);
-  $('btn-settings-back').onclick = () => showScreen('numpad');
 
   // Populate form
   $('set-currency').value = s.currency;
@@ -191,12 +187,6 @@ function initSettingsScreen(showBack = true) {
     initNumpadScreen();
   };
 
-  $('btn-disconnect').onclick = () => {
-    if (!confirm('Remove LNC credentials from this browser?')) return;
-    LNC.disconnect();
-    showScreen('pair');
-    initPairScreen();
-  };
 }
 
 function updateCustomUrlVisibility(api) {
@@ -237,10 +227,12 @@ function initNumpadScreen() {
     updateAmountDisplay();
   };
 
-  $('btn-open-settings').onclick = () => {
+  $('btn-logout').onclick = () => {
+    if (!confirm('Log out and remove stored credentials from this browser?')) return;
     stopRateRefresh();
-    showScreen('settings');
-    initSettingsScreen(true);
+    LNC.disconnect();
+    showScreen('pair');
+    initPairScreen();
   };
 
   $('btn-open-txns').onclick = () => {
