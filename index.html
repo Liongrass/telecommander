@@ -170,7 +170,7 @@
         <div></div>
       </div>
 
-      <div class="invoice-amounts">
+      <div class="invoice-amounts" id="invoice-amounts">
         <div class="invoice-fiat" id="invoice-fiat-display"></div>
         <div class="invoice-sats" id="invoice-sats-display"></div>
         <div class="invoice-memo" id="invoice-memo-display"></div>
@@ -188,6 +188,8 @@
         <div class="status-paid hidden" id="status-paid">
           <div class="status-icon status-icon--success">✓</div>
           <span>Payment received!</span>
+          <div class="paid-amounts" id="paid-amounts"></div>
+          <button class="btn btn-primary btn-full" id="btn-new-payment">New Payment</button>
         </div>
         <div class="status-expired hidden" id="status-expired">
           <div class="status-icon status-icon--error">✕</div>

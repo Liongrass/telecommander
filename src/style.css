@@ -434,8 +434,34 @@ select option { background: var(--surface); }
   font-weight: 600;
 }
 
-.status-paid span { color: var(--success); }
+.status-paid span { color: var(--success); font-size: 1.4rem; }
 .status-expired span { color: var(--error); }
+
+.status-paid .status-icon--success {
+  width: 96px;
+  height: 96px;
+  font-size: 3.5rem;
+}
+
+.paid-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.paid-fiat {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+
+.paid-sats {
+  font-size: 1rem;
+  color: var(--muted);
+}
 
 /* ── Countdown bar ─────────────────────────────────────────── */
 .countdown-bar-wrap {

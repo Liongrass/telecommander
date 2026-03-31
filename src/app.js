@@ -333,7 +333,7 @@ function showInvoice(invoice, fiatAmount, sats) {
   activePoller = LNC.pollInvoice(
     rHash,
     timeoutMs,
-    () => onInvoicePaid(),
+    () => onInvoicePaid(fiatAmount, sats),
     () => onInvoiceExpired(),
     (err) => showToast('Poll error: ' + err.message, 4000),
   );
@@ -360,14 +360,22 @@ function cancelInvoice() {
   clearInterval(countdownTimer);
 }
 
-function onInvoicePaid() {
+function onInvoicePaid(fiatAmount, sats) {
   clearInterval(countdownTimer);
   activePoller = null;
   $('countdown-wrap').classList.add('hidden');
   $('status-pending').classList.add('hidden');
-  $('status-paid').classList.remove('hidden');
+  $('qr-container').classList.add('hidden');
+  $('invoice-amounts').classList.add('hidden');
 
-  setTimeout(returnToNumpad, 3000);
+  const sym = currencySymbol(settings.currency);
+  $('paid-amounts').innerHTML = `
+    <div class="paid-fiat">${sym}${fiatAmount.toFixed(2)}</div>
+    <div class="paid-sats">${formatSats(sats)}</div>
+  `;
+
+  $('status-paid').classList.remove('hidden');
+  $('btn-new-payment').onclick = returnToNumpad;
 }
 
 function onInvoiceExpired() {
@@ -384,6 +392,9 @@ function onInvoiceExpired() {
 
 function returnToNumpad() {
   cancelInvoice();
+  // Reset invoice screen state for next use
+  $('qr-container').classList.remove('hidden');
+  $('invoice-amounts').classList.remove('hidden');
   numpadDigits = [];
   showScreen('numpad');
   initNumpadScreen();
