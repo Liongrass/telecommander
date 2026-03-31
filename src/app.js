@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 import * as LNC from './lnc.js';
-import { getSettings, saveSettings, hasSettings, currencySymbol } from './settings.js';
+import { getSettings, saveSettings, currencySymbol } from './settings.js';
 import { fetchBtcRate, fiatToSats, formatSats } from './currency.js';
 
 // ── State ───────────────────────────────────────────────────
@@ -126,8 +126,8 @@ function initPairScreen() {
         await LNC.pair(phrase, password);
       }
 
-      // After connecting, go to settings (first time) or numpad (returning)
-      if (!hasSettings()) {
+      // New pairing phrase → always show settings. Returning login → go straight to numpad.
+      if (!isPaired) {
         showScreen('settings');
         initSettingsScreen();
       } else {

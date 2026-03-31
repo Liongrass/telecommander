@@ -24,9 +24,6 @@ export function saveSettings(patch) {
   return next;
 }
 
-export function hasSettings() {
-  return localStorage.getItem(KEY) !== null;
-}
 
 /** Returns the currency symbol for common currencies, falls back to the code. */
 export function currencySymbol(code) {
