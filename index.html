@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Telecommander ⚡</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <!-- ── PAIR SCREEN ─────────────────────────────────────────── -->
+  <div id="screen-pair" class="screen active">
+    <div class="screen-inner">
+      <div class="logo">
+        <span class="bolt">⚡</span>
+        <h1>Telecommander</h1>
+        <p class="subtitle">Lightning Point of Sale</p>
+      </div>
+
+      <div class="card" id="pair-form">
+        <div class="form-group" id="phrase-group">
+          <label for="pairing-phrase">LNC Pairing Phrase</label>
+          <textarea id="pairing-phrase" rows="3"
+            placeholder="Enter your Lightning Node Connect pairing phrase…"></textarea>
+          <p class="hint">
+            Generate this in Lightning Terminal with <strong>invoices</strong> permission
+            (not readonly — invoices must be created).
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="pair-password">Local Password</label>
+          <input type="password" id="pair-password"
+            placeholder="Encrypts credentials in this browser" />
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-connect">Connect</button>
+        <p id="pair-error" class="error hidden"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS SCREEN ────────────────────────────────────── -->
+  <div id="screen-settings" class="screen">
+    <div class="screen-inner">
+      <div class="screen-header">
+        <button class="btn-icon" id="btn-settings-back" title="Back">←</button>
+        <h2>Settings</h2>
+        <div></div>
+      </div>
+
+      <div class="card">
+        <div class="form-group">
+          <label for="set-currency">Fiat Currency</label>
+          <select id="set-currency">
+            <option value="USD">USD — US Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="CHF">CHF — Swiss Franc</option>
+            <option value="SEK">SEK — Swedish Krona</option>
+            <option value="NOK">NOK — Norwegian Krone</option>
+            <option value="DKK">DKK — Danish Krone</option>
+            <option value="SGD">SGD — Singapore Dollar</option>
+            <option value="HKD">HKD — Hong Kong Dollar</option>
+            <option value="NZD">NZD — New Zealand Dollar</option>
+            <option value="MXN">MXN — Mexican Peso</option>
+            <option value="BRL">BRL — Brazilian Real</option>
+            <option value="ZAR">ZAR — South African Rand</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Exchange Rate API</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="rate-api" value="coingecko" checked />
+              CoinGecko (free, no key)
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="rate-api" value="blockchain" />
+              Blockchain.info
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="rate-api" value="custom" />
+              Custom URL
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group hidden" id="custom-url-group">
+          <label for="set-custom-url">Custom API URL</label>
+          <input type="url" id="set-custom-url"
+            placeholder="https://… — must return JSON with a numeric rate field" />
+          <p class="hint">
+            Response must include one of: <code>rate</code>, <code>price</code>,
+            or <code>{currency}</code> (lowercase) as a number.
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="set-memo">Default Invoice Memo</label>
+          <input type="text" id="set-memo" maxlength="100"
+            placeholder="e.g. Payment, Thanks!" />
+        </div>
+
+        <div class="form-group">
+          <label for="set-timeout">Invoice Timeout (seconds)</label>
+          <input type="number" id="set-timeout" min="30" max="3600" step="30" />
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-settings-save">Save &amp; Continue</button>
+        <p id="settings-error" class="error hidden"></p>
+      </div>
+
+      <div class="card card-danger">
+        <h3>Disconnect</h3>
+        <p>Remove stored LNC credentials from this browser.</p>
+        <button class="btn btn-danger" id="btn-disconnect">Disconnect Node</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NUMPAD SCREEN ──────────────────────────────────────── -->
+  <div id="screen-numpad" class="screen">
+    <div class="screen-inner screen-numpad-inner">
+
+      <div class="numpad-toolbar">
+        <button class="btn-icon" id="btn-open-settings" title="Settings">⚙</button>
+        <button class="btn-icon" id="btn-open-txns" title="Recent transactions">☰</button>
+      </div>
+
+      <div class="amount-display">
+        <div class="amount-fiat">
+          <span class="currency-symbol" id="currency-symbol">$</span><span id="amount-fiat-value">0.00</span>
+        </div>
+        <div class="amount-sats" id="amount-sats">— sats</div>
+      </div>
+
+      <div class="numpad-grid">
+        <button class="numpad-btn" data-digit="1">1</button>
+        <button class="numpad-btn" data-digit="2">2</button>
+        <button class="numpad-btn" data-digit="3">3</button>
+        <button class="numpad-btn" data-digit="4">4</button>
+        <button class="numpad-btn" data-digit="5">5</button>
+        <button class="numpad-btn" data-digit="6">6</button>
+        <button class="numpad-btn" data-digit="7">7</button>
+        <button class="numpad-btn" data-digit="8">8</button>
+        <button class="numpad-btn" data-digit="9">9</button>
+        <button class="numpad-btn numpad-btn--muted" id="btn-clear">C</button>
+        <button class="numpad-btn" data-digit="0">0</button>
+        <button class="numpad-btn numpad-btn--muted" id="btn-backspace">⌫</button>
+      </div>
+
+      <button class="btn btn-primary btn-full btn-request" id="btn-request">
+        ⚡ Request Payment
+      </button>
+      <p id="numpad-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── INVOICE SCREEN ─────────────────────────────────────── -->
+  <div id="screen-invoice" class="screen">
+    <div class="screen-inner">
+      <div class="screen-header">
+        <button class="btn-icon" id="btn-cancel-invoice" title="Cancel">✕</button>
+        <h2>Scan to Pay</h2>
+        <div></div>
+      </div>
+
+      <div class="invoice-amounts">
+        <div class="invoice-fiat" id="invoice-fiat-display"></div>
+        <div class="invoice-sats" id="invoice-sats-display"></div>
+        <div class="invoice-memo" id="invoice-memo-display"></div>
+      </div>
+
+      <div class="qr-container" id="qr-container">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+
+      <div class="invoice-status" id="invoice-status">
+        <div class="status-pending" id="status-pending">
+          <div class="spinner"></div>
+          <span>Waiting for payment…</span>
+        </div>
+        <div class="status-paid hidden" id="status-paid">
+          <div class="status-icon status-icon--success">✓</div>
+          <span>Payment received!</span>
+        </div>
+        <div class="status-expired hidden" id="status-expired">
+          <div class="status-icon status-icon--error">✕</div>
+          <span>Invoice expired</span>
+        </div>
+      </div>
+
+      <div class="countdown-bar-wrap" id="countdown-wrap">
+        <div class="countdown-bar" id="countdown-bar"></div>
+        <span class="countdown-label" id="countdown-label"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRANSACTIONS SCREEN ───────────────────────────────── -->
+  <div id="screen-transactions" class="screen">
+    <div class="screen-inner">
+      <div class="screen-header">
+        <button class="btn-icon" id="btn-txns-back" title="Back">←</button>
+        <h2>Recent Transactions</h2>
+        <div></div>
+      </div>
+
+      <div id="txns-list" class="txns-list">
+        <p class="muted">Loading…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ─────────────────────────────────────────────── -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>
