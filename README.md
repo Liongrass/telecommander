@@ -82,8 +82,8 @@ On subsequent visits the app only asks for your local password — the pairing p
 
 ## Examples
 
-![Telecommander Numpad][screenshot_numpad.png "Numpad"]
+![Telecommander Numpad][screenshot_numpad.png]
 
-![Telecommander QR Code][screenshot_qr.png "QR Code"]
+![Telecommander QR Code][screenshot_qr.png]
 
-![Telecommander Success][screenshot_success.png "Success"]
+![Telecommander Success][screenshot_success.png]
