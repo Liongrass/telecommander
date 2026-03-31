@@ -435,13 +435,15 @@ select option { background: var(--surface); }
 }
 
 .status-paid span { color: var(--success); font-size: 1.4rem; }
-.status-expired span { color: var(--error); }
+.status-expired span { color: var(--error); font-size: 1.4rem; }
 
-.status-paid .status-icon--success {
+.status-paid .status-icon--success,
+.status-expired .status-icon--error {
   width: 96px;
   height: 96px;
   font-size: 3.5rem;
 }
+
 
 .paid-amounts {
   display: flex;

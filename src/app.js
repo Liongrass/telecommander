@@ -383,11 +383,10 @@ function onInvoiceExpired() {
   activePoller = null;
   $('countdown-wrap').classList.add('hidden');
   $('status-pending').classList.add('hidden');
+  $('qr-container').classList.add('hidden');
+  $('invoice-amounts').classList.add('hidden');
   $('status-expired').classList.remove('hidden');
-
-  // Let the user dismiss manually via Cancel button (now acts as "Back")
-  $('btn-cancel-invoice').textContent = '← Back';
-  $('btn-cancel-invoice').onclick = returnToNumpad;
+  $('btn-expired-back').onclick = returnToNumpad;
 }
 
 function returnToNumpad() {
