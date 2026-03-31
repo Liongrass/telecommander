@@ -6,6 +6,7 @@ export async function fetchBtcRate(settings) {
   if (currencyApi === 'coingecko') {
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${cur}`;
     const res = await fetch(url);
+    if (res.status === 429) throw new Error('CoinGecko rate limit reached — try again in a minute, or switch to Blockchain.info in settings');
     if (!res.ok) throw new Error(`CoinGecko returned ${res.status}`);
     const data = await res.json();
     const rate = data?.bitcoin?.[cur];
@@ -15,6 +16,7 @@ export async function fetchBtcRate(settings) {
 
   if (currencyApi === 'blockchain') {
     const res = await fetch('https://blockchain.info/ticker');
+    if (res.status === 429) throw new Error('Blockchain.info rate limit reached — try again shortly');
     if (!res.ok) throw new Error(`Blockchain.info returned ${res.status}`);
     const data = await res.json();
     const rate = data?.[currency.toUpperCase()]?.last;

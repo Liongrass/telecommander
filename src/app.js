@@ -92,7 +92,7 @@ async function refreshRate() {
 function startRateRefresh() {
   refreshRate();
   clearInterval(rateRefreshTimer);
-  rateRefreshTimer = setInterval(refreshRate, 30_000);
+  rateRefreshTimer = setInterval(refreshRate, 60_000);
 }
 
 function stopRateRefresh() {
