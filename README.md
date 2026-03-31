@@ -79,3 +79,11 @@ On subsequent visits the app only asks for your local password — the pairing p
 - Credentials (local key, remote key, proxy address) are encrypted with your local password and stored in `localStorage`.
 - Exchange rates are fetched from the configured public API. No rate data is sent to your node.
 - Invoice status is polled every 2 seconds until paid or expired.
+
+## Examples
+
+![Telecommander Numpad][screenshot_numpad.png "Numpad"]
+
+![Telecommander QR Code][screenshot_qr.png "QR Code"]
+
+![Telecommander Success][screenshot_success.png "Success"]
