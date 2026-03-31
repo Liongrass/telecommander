@@ -6,8 +6,8 @@
   --surface:   #192036;
   --surface2:  #2e3a5c;
   --border:    #384770;
-  --primary:   #5d5fef;
-  --primary-d: #5040ed;
+  --primary:   #5254c8;
+  --primary-d: #4547b0;
   --success:   #10b981;
   --error:     #ef4444;
   --text:      #f5f5f5;
@@ -78,14 +78,13 @@ html, body {
   font-size: 3rem;
   display: block;
   margin-bottom: 8px;
-  filter: drop-shadow(0 0 16px var(--primary));
 }
 
 .logo h1 {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: -0.5px;
-  color: var(--primary);
+  color: var(--text);
 }
 
 .logo .subtitle {
