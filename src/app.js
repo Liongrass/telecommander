@@ -184,6 +184,7 @@ function initSettingsScreen(showBack = true) {
       customApiUrl: $('set-custom-url').value.trim(),
       defaultMemo: $('set-memo').value.trim() || 'Payment',
       invoiceTimeout: timeout,
+
     });
 
     showScreen('numpad');

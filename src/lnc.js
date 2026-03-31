@@ -1,12 +1,24 @@
 import LNC from '@lightninglabs/lnc-web';
 
 const NAMESPACE = 'telecommander';
+const DEFAULT_PROXY = 'mailbox.terminal.lightning.today:443';
 
 let lnc = null;
 
+const log = (...args) => console.log('[LNC]', ...args);
+
 function ensureLNC() {
   if (!lnc) {
+    log('Creating LNC instance, namespace:', NAMESPACE);
     lnc = new LNC({ namespace: NAMESPACE });
+    log('LNC instance keys:', Object.keys(lnc));
+
+    // Log any observable status properties every 2s for 30s after creation
+    let ticks = 0;
+    const poller = setInterval(() => {
+      log(`[tick ${++ticks}] isConnected:`, lnc.isConnected, '| isReady:', lnc.isReady, '| status:', lnc.status);
+      if (ticks >= 15) clearInterval(poller);
+    }, 2000);
   }
   return lnc;
 }
@@ -14,28 +26,63 @@ function ensureLNC() {
 /** True if credentials are already stored in localStorage from a prior session. */
 export function isPaired() {
   try {
-    const l = ensureLNC();
-    return l.credentials?.isPaired ?? false;
-  } catch {
+    const temp = new LNC({ namespace: NAMESPACE });
+    const paired = temp.credentials?.isPaired ?? false;
+    log('isPaired check:', paired);
+    return paired;
+  } catch (e) {
+    log('isPaired error:', e);
     return false;
   }
 }
 
 /** First-time pair: store the pairing phrase and connect. */
 export async function pair(pairingPhrase, password) {
-  const l = ensureLNC();
-  l.pairingPhrase = pairingPhrase.trim();
-  l.password = password;
+  log('Pairing — phrase word count:', pairingPhrase.trim().split(/\s+/).length);
+  // Pass pairingPhrase via constructor so lnc-web initialises the WASM with it
+  lnc = new LNC({
+    namespace: NAMESPACE,
+    pairingPhrase: pairingPhrase.trim(),
+    password,
+  });
+  const l = lnc;
+  log('Credentials before connect:', {
+    isPaired: l.credentials?.isPaired,
+    serverHost: l.credentials?.serverHost,
+    localKey: l.credentials?.localKey ? '(set)' : '(unset)',
+    remoteKey: l.credentials?.remoteKey ? '(set)' : '(unset)',
+  });
+  log('Calling l.connect()…');
   await l.connect();
+  log('connect() resolved — isConnected:', l.isConnected, '| isReady:', l.isReady, '| status:', l.status);
+  assertConnected(l);
   return l.isConnected;
 }
 
 /** Subsequent login: unlock stored credentials with the password. */
 export async function login(password) {
   const l = ensureLNC();
+  log('Logging in with stored credentials');
   l.password = password;
+  log('Credentials before connect:', {
+    isPaired: l.credentials?.isPaired,
+    serverHost: l.credentials?.serverHost,
+    localKey: l.credentials?.localKey ? '(set)' : '(unset)',
+    remoteKey: l.credentials?.remoteKey ? '(set)' : '(unset)',
+  });
+  log('Calling l.connect()…');
   await l.connect();
+  log('connect() resolved — isConnected:', l.isConnected, '| isReady:', l.isReady, '| status:', l.status);
+  assertConnected(l);
   return l.isConnected;
+}
+
+function assertConnected(l) {
+  if (!l.isConnected) {
+    const status = l.status || 'Unknown error';
+    lnc = null; // reset so next attempt gets a fresh instance
+    throw new Error(status);
+  }
 }
 
 export function disconnect() {
@@ -68,20 +115,25 @@ export async function createInvoice(valueSats, memo, expiry) {
     memo,
     expiry: String(expiry),
   });
+  log('addInvoice rHash type:', typeof resp.rHash, '| value:', resp.rHash);
   return {
     paymentRequest: resp.paymentRequest,
-    rHash: rHashToHex(resp.rHash),
+    rHash: resp.rHash,  // pass through raw — lookupInvoice will use it directly
     addIndex: resp.addIndex,
   };
 }
 
 /**
- * Look up an invoice by its payment hash (hex string).
- * Returns the invoice object.
+ * Look up an invoice by its payment hash.
+ * Accepts whatever type lnc-web returns for rHash (bytes, base64 string, Uint8Array).
  */
-export async function lookupInvoice(rHashHex) {
+export async function lookupInvoice(rHash) {
   const l = ensureLNC();
-  return l.lnd.lightning.lookupInvoice({ rHashStr: rHashHex });
+  // Try rHash (bytes) first; fall back to rHashStr (hex) if it looks like a hex string
+  if (typeof rHash === 'string' && /^[0-9a-f]{64}$/i.test(rHash)) {
+    return l.lnd.lightning.lookupInvoice({ rHashStr: rHash });
+  }
+  return l.lnd.lightning.lookupInvoice({ rHash });
 }
 
 /**
@@ -151,26 +203,3 @@ export function pollInvoice(rHashHex, timeoutMs, onPaid, onExpired, onError) {
   };
 }
 
-// ── Utility ─────────────────────────────────────────────────
-
-function rHashToHex(rHash) {
-  if (!rHash) return '';
-  // Already a hex string (64 lowercase hex chars)
-  if (typeof rHash === 'string' && /^[0-9a-f]{64}$/i.test(rHash)) return rHash.toLowerCase();
-  // Base64 string → hex
-  if (typeof rHash === 'string') {
-    try {
-      const bin = atob(rHash);
-      return Array.from(bin).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-    } catch {}
-  }
-  // Uint8Array → hex
-  if (rHash instanceof Uint8Array) {
-    return Array.from(rHash).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-  // Array of numbers
-  if (Array.isArray(rHash)) {
-    return rHash.map(b => Number(b).toString(16).padStart(2, '0')).join('');
-  }
-  return String(rHash);
-}
