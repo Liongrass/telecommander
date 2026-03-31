@@ -37,15 +37,18 @@ export function isPaired() {
 }
 
 /** First-time pair: store the pairing phrase and connect. */
-export async function pair(pairingPhrase, password) {
+export async function pair(pairingPhrase, password, serverHost) {
   log('Pairing — phrase word count:', pairingPhrase.trim().split(/\s+/).length);
-  // Pass pairingPhrase via constructor so lnc-web initialises the WASM with it
   lnc = new LNC({
     namespace: NAMESPACE,
     pairingPhrase: pairingPhrase.trim(),
     password,
   });
   const l = lnc;
+  if (serverHost) {
+    l.credentials.serverHost = serverHost;
+    log('serverHost set to:', serverHost);
+  }
   log('Credentials before connect:', {
     isPaired: l.credentials?.isPaired,
     serverHost: l.credentials?.serverHost,

@@ -104,11 +104,13 @@ function initPairScreen() {
   const phraseGroup = $('phrase-group');
   const isPaired = LNC.isPaired();
 
-  // If credentials exist, hide the phrase input — only need the password
+  // If credentials exist, hide the phrase + proxy inputs — only need the password
   if (isPaired) {
     phraseGroup.classList.add('hidden');
+    $('proxy-group').classList.add('hidden');
   } else {
     phraseGroup.classList.remove('hidden');
+    $('proxy-group').classList.remove('hidden');
   }
 
   $('btn-connect').onclick = async () => {
@@ -123,7 +125,8 @@ function initPairScreen() {
       } else {
         const phrase = $('pairing-phrase').value.trim();
         if (!phrase) { showError('pair-error', 'Pairing phrase is required.'); return; }
-        await LNC.pair(phrase, password);
+        const proxy = $('pair-proxy').value.trim();
+        await LNC.pair(phrase, password, proxy);
       }
 
       // New pairing phrase → always show settings. Returning login → go straight to numpad.
@@ -409,8 +412,10 @@ async function loadTransactions() {
       return;
     }
 
+    const sym = currencySymbol(settings.currency);
+
     list.innerHTML = '';
-    invoices.forEach(inv => {
+    [...invoices].reverse().forEach(inv => {
       const card = document.createElement('div');
       const isSettled = inv.settled;
       const isExpired = !isSettled && inv.expiry && Date.now() / 1000 > Number(inv.creationDate) + Number(inv.expiry);
@@ -420,11 +425,14 @@ async function loadTransactions() {
       card.className = `txn-card ${statusClass}`;
 
       const sats = Number(inv.value || inv.valueMsat / 1000 || 0);
+      const fiatStr = btcRate
+        ? sym + (sats / 100_000_000 * btcRate).toFixed(2)
+        : null;
       const date = new Date(Number(inv.creationDate) * 1000).toLocaleString();
       const memo = inv.memo || '—';
 
       card.innerHTML = `
-        <div class="txn-amount">${sats.toLocaleString()} sats</div>
+        <div class="txn-amount">${fiatStr ? fiatStr + ' · ' : ''}${sats.toLocaleString()} sats</div>
         <span class="txn-status ${statusClass}">${statusLabel}</span>
         <div class="txn-meta">${memo} · ${date}</div>
       `;
