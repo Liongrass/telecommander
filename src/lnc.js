@@ -118,9 +118,9 @@ export function isConnected() {
 export async function createInvoice(valueSats, memo, expiry) {
   const l = ensureLNC();
   const resp = await l.lnd.lightning.addInvoice({
-    value: String(valueSats),
+    value: valueSats,
     memo,
-    expiry: String(expiry),
+    expiry,
   });
   log('addInvoice rHash type:', typeof resp.rHash, '| value:', resp.rHash);
   return {
@@ -151,7 +151,7 @@ export async function listRecentInvoices(limit = 3) {
   const l = ensureLNC();
   const resp = await l.lnd.lightning.listInvoices({
     reversed: true,
-    numMaxInvoices: String(limit),
+    numMaxInvoices: limit,
   });
   return resp.invoices ?? [];
 }
